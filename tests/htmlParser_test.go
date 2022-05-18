@@ -37,9 +37,9 @@ func TestHTMLParser(t *testing.T) {
 	t.Log("HTML Links Counter")
 	{
 		t.Run("Link", func(t *testing.T) {
-			ExpectEqual(t, util.Links("https://www.w3.org/", dummyHTML1), model.Link{60, 6, 0})
-			ExpectEqual(t, util.Links("https://www.tic.com/", dummyHTML2), model.Link{13, 9, 0})
-			ExpectEqual(t, util.Links("https://www.tic.com/", dummyHTML3), model.Link{13, 9, 0})
+			ExpectEqual(t, util.Links("https://www.w3.org/", dummyHTML1), model.Link{50, 6, 4})
+			ExpectEqual(t, util.Links("https://www.tic.com/", dummyHTML2), model.Link{2, 9, 2})
+			ExpectEqual(t, util.Links("https://www.tic.com/", dummyHTML3), model.Link{2, 9, 2})
 		})
 	}
 

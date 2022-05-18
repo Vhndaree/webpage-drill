@@ -1,7 +1,7 @@
 package util
 
 import (
-	"fmt"
+	"net/http"
 	"strings"
 	"webpageinfo/model"
 )

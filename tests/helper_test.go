@@ -15,4 +15,13 @@ func TestHelper(t *testing.T) {
 			ExpectEqual(t, util.SanitizeURL(""), "")
 		})
 	}
+
+	t.Log("Adds http protocol")
+	{
+		t.Run("AddURLProtocol", func(t *testing.T) {
+			ExpectEqual(t, util.AddURLProtocol("https://app.go"), "https://app.go")
+			ExpectEqual(t, util.AddURLProtocol("http://app.go"), "http://app.go")
+			ExpectEqual(t, util.AddURLProtocol("app.go"), "https://app.go")
+		})
+	}
 }
