@@ -9,4 +9,4 @@ This is a simple api server to drill websites.
 3. Run the web server `go run main.go` 
     - Your console should look like ![Employee data](/screenshots/server-start.png)
 4. Using client is completely up to you, you can use postman like tools or simply curl the api
-    a. curl command -> `curl --request GET 'http://127.0.0.1:8848/?url=www.facebook.com/'`
+    - curl command -> `curl --request GET 'http://127.0.0.1:8848/?url=www.facebook.com/'`
