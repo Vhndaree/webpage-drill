@@ -1,7 +1,20 @@
 package api
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"net/http"
+)
+
+var green = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
+var reset = string([]byte{27, 91, 48, 109})
 
 func StartWeb() {
-	fmt.Println(ReadWebPage("https://identity.gebuhrenfrei.com/auth/realms/advanzia-deu/protocol/openid-connect/auth?client_id=advanzia-web-client&redirect_uri=https%3A%2F%2Fmein.gebuhrenfrei.com%2Fretail-app-de%2Fredirect&state=6da6b2ed-082a-4294-8179-f9f3603b3835&response_mode=fragment&response_type=code%20id_token%20token&scope=openid&nonce=3e3ea2fd-ed28-414e-9ba6-feb3e0d0f13a&ui_locales=de&code_challenge=3S-SQeibDKuei3JaV8bQo3FbwP4yzHhp0nyLTCo3_NA&code_challenge_method=S256"))
+	port := ":8848"
+	fmt.Printf("%sStarting API server on port%s.... %s \n", green, port, reset)
+	log.Println("Press Ctrl+C to stop the server.")
+
+	http.HandleFunc("/", ReadWebPage)
+
+	http.ListenAndServe(port, nil)
 }
