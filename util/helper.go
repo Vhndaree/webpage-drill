@@ -9,3 +9,11 @@ func SanitizeURL(url string) string {
 
 	return url
 }
+
+func AddURLProtocol(url string) string {
+	if !strings.Contains(url, "http") {
+		return "https://" + url
+	}
+
+	return url
+}
