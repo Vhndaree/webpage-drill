@@ -33,7 +33,7 @@ func Version(content string) string {
 }
 
 func Title(content string) string {
-	titleStartIndex := strings.Index(content, "<title>")
+	titleStartIndex := strings.Index(content, "<title")
 	if titleStartIndex == -1 {
 		return "no title exist in the document"
 	}
@@ -44,7 +44,9 @@ func Title(content string) string {
 		return "valid title do not exist"
 	}
 
-	return content[titleStartIndex:titleEndIndex]
+	title := content[titleStartIndex:titleEndIndex]
+	titleclosing := strings.Index(title, ">")
+	return title[(titleclosing + 1):]
 }
 
 func Headings(content string) (h model.Headings) {
@@ -83,7 +85,6 @@ func Headings(content string) (h model.Headings) {
 
 func Links(url, content string) (l model.Link) {
 	hrefStrings := strings.Split(content, "href=")
-	fmt.Println(url)
 	for _, h := range hrefStrings {
 		hrefStartIndex := strings.Index(h, "://")
 		href := h
@@ -96,6 +97,19 @@ func Links(url, content string) (l model.Link) {
 
 		if !strings.Contains(href, ".") {
 			l.Internal++
+			continue
+		}
+
+		response, err := http.Get(AddURLProtocol(href))
+		if err != nil {
+			l.InaccessibleLinks++
+			continue
+		}
+		defer response.Body.Close()
+
+		if response.StatusCode < 200 || response.StatusCode > 299 {
+			l.InaccessibleLinks++
+			continue
 		}
 
 		domainEndIndex := strings.Index(url, "/")

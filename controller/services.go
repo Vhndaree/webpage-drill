@@ -17,19 +17,7 @@ func ReadWebPage(w http.ResponseWriter, r *http.Request) {
 
 		url := util.AddURLProtocol(r.URL.Query().Get("url"))
 		if url == "" {
-			var resp = make(map[string]string)
-			resp["message"] = "url is not valid"
-
-			res, err := json.Marshal(resp)
-			if err != nil {
-				fmt.Println("[ERROR] Marshalling data")
-				w.WriteHeader(500)
-				return
-			}
-
-			w.WriteHeader(400)
-			w.Write(res)
-			return
+			handleEmptyURL(w)
 		}
 
 		response, err := http.Get(url)
@@ -46,13 +34,7 @@ func ReadWebPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		content := string(dataInBytes)
-		d := model.Data{
-			HTMLVersion:  util.Version(content),
-			Title:        util.Title(content),
-			HeadingCount: util.Headings(content),
-			Link:         util.Links(util.SanitizeURL(url), content),
-			HasLoginForm: util.HasLoginForm(content),
-		}
+		d := generateResponse(url, content)
 
 		res, err := json.Marshal(&d)
 		if err != nil {
@@ -62,5 +44,30 @@ func ReadWebPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Write(res)
+	}
+}
+
+func handleEmptyURL(w http.ResponseWriter) {
+	var resp = make(map[string]string)
+	resp["message"] = "url is not valid"
+
+	res, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Println("[ERROR] Marshalling data")
+		w.WriteHeader(500)
+		return
+	}
+
+	w.WriteHeader(400)
+	w.Write(res)
+}
+
+func generateResponse(url, content string) model.Data {
+	return model.Data{
+		HTMLVersion:  util.Version(content),
+		Title:        util.Title(content),
+		HeadingCount: util.Headings(content),
+		Link:         util.Links(util.SanitizeURL(url), content),
+		HasLoginForm: util.HasLoginForm(content),
 	}
 }
