@@ -84,7 +84,31 @@ func Headings(content string) (h model.Headings) {
 }
 
 func Links(url, content string) (l model.Link) {
-	hrefStrings := strings.Split(content, "href=")
+	body := strings.Split(content, "<body")[1]
+
+	// Remove link tags
+	flag := true
+	firstPart := ""
+	secondPart := ""
+	for flag {
+		linkStartIndex := strings.Index(body, "<link")
+		if linkStartIndex != -1 {
+			firstPart = body[:linkStartIndex]
+			body = body[(linkStartIndex + 5):]
+		}
+
+		linkEndIndex := strings.Index(body, ">")
+		if linkEndIndex != -1 {
+			secondPart = body[(linkEndIndex + 1):]
+			body = firstPart + secondPart
+		}
+
+		if !strings.Contains(body, "<link") {
+			flag = false
+		}
+	}
+
+	hrefStrings := strings.Split(body, "href=")
 	for _, h := range hrefStrings {
 		hrefStartIndex := strings.Index(h, "://")
 		href := h
