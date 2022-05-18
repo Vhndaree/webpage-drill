@@ -44,7 +44,19 @@ func ReadWebPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Write(res)
+		return
 	}
+
+	w.WriteHeader(200)
+	var resp = make(map[string]string)
+	resp["message"] = "There is no task at for the request"
+	res, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+	}
+
+	w.Write(res)
 }
 
 func handleEmptyURL(w http.ResponseWriter) {
