@@ -24,8 +24,8 @@ This is a simple api server to drill websites.
             "h6": 1
         },
         "links": {
-            "external_links": 39,
-            "internal_links": 31,
+            "external_links": 18,
+            "internal_links": 29,
             "inaccessible_links": 1
         },
         "has_login_form": true
