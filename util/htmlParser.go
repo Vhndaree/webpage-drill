@@ -85,28 +85,7 @@ func Headings(content string) (h model.Headings) {
 
 func Links(url, content string) (l model.Link) {
 	body := strings.Split(content, "<body")[1]
-
-	// Remove link tags
-	flag := true
-	firstPart := ""
-	secondPart := ""
-	for flag {
-		linkStartIndex := strings.Index(body, "<link")
-		if linkStartIndex != -1 {
-			firstPart = body[:linkStartIndex]
-			body = body[(linkStartIndex + 5):]
-		}
-
-		linkEndIndex := strings.Index(body, ">")
-		if linkEndIndex != -1 {
-			secondPart = body[(linkEndIndex + 1):]
-			body = firstPart + secondPart
-		}
-
-		if !strings.Contains(body, "<link") {
-			flag = false
-		}
-	}
+	body = removeLinkTags(body)
 
 	hrefStrings := strings.Split(body, "href=")
 	for _, h := range hrefStrings {
@@ -117,7 +96,9 @@ func Links(url, content string) (l model.Link) {
 		}
 		hrefQuote := h[:1]
 		hrefEndIndex := strings.Index(href, hrefQuote)
-		href = href[:hrefEndIndex]
+		if hrefEndIndex != -1 {
+			href = href[:hrefEndIndex]
+		}
 
 		if !strings.Contains(href, ".") {
 			l.Internal++
@@ -137,7 +118,10 @@ func Links(url, content string) (l model.Link) {
 		}
 
 		domainEndIndex := strings.Index(url, "/")
-		domain := url[:domainEndIndex]
+		domain := url
+		if domainEndIndex != -1 {
+			domain = url[:domainEndIndex]
+		}
 
 		if strings.Contains(href, domain) {
 			l.Internal++
@@ -192,4 +176,29 @@ func HasLoginForm(content string) bool {
 	}
 
 	return (float32)(criteria)/float32(count) > 0.4
+}
+
+func removeLinkTags(body string) string {
+	flag := true
+	firstPart := ""
+	secondPart := ""
+	for flag {
+		linkStartIndex := strings.Index(body, "<link")
+		if linkStartIndex != -1 {
+			firstPart = body[:linkStartIndex]
+			body = body[(linkStartIndex + 5):]
+		}
+
+		linkEndIndex := strings.Index(body, ">")
+		if linkEndIndex != -1 {
+			secondPart = body[(linkEndIndex + 1):]
+			body = firstPart + secondPart
+		}
+
+		if !strings.Contains(body, "<link") {
+			flag = false
+		}
+	}
+
+	return body
 }
