@@ -3,6 +3,7 @@ package util
 import (
 	"net/http"
 	"strings"
+	"sync"
 	"webpageinfo/model"
 )
 
@@ -88,47 +89,58 @@ func Links(url, content string) (l model.Link) {
 	body = removeLinkTags(body)
 
 	hrefStrings := strings.Split(body, "href=")
+	var wg sync.WaitGroup
+	wg.Add(len(hrefStrings))
+
 	for _, h := range hrefStrings {
-		hrefStartIndex := strings.Index(h, "://")
-		href := h
-		if hrefStartIndex != -1 {
-			href = h[(hrefStartIndex + 3):]
-		}
-		hrefQuote := h[:1]
-		hrefEndIndex := strings.Index(href, hrefQuote)
-		if hrefEndIndex != -1 {
-			href = href[:hrefEndIndex]
-		}
+		go func(h string) {
+			hrefStartIndex := strings.Index(h, "://")
+			href := h
+			if hrefStartIndex != -1 {
+				href = h[(hrefStartIndex + 3):]
+			}
+			hrefQuote := h[:1]
+			hrefEndIndex := strings.Index(href, hrefQuote)
+			if hrefEndIndex != -1 {
+				href = href[:hrefEndIndex]
+			}
 
-		if !strings.Contains(href, ".") {
-			l.Internal++
-			continue
-		}
+			if !strings.Contains(href, ".") {
+				l.Internal++
+				wg.Done()
+				return
+			}
 
-		response, err := http.Get(AddURLProtocol(href))
-		if err != nil {
-			l.InaccessibleLinks++
-			continue
-		}
-		defer response.Body.Close()
+			response, err := http.Get(AddURLProtocol(href))
+			if err != nil {
+				l.InaccessibleLinks++
+				wg.Done()
+				return
+			}
+			defer response.Body.Close()
 
-		if response.StatusCode < 200 || response.StatusCode > 299 {
-			l.InaccessibleLinks++
-			continue
-		}
+			if response.StatusCode < 200 || response.StatusCode > 299 {
+				l.InaccessibleLinks++
+				wg.Done()
+				return
+			}
 
-		domainEndIndex := strings.Index(url, "/")
-		domain := url
-		if domainEndIndex != -1 {
-			domain = url[:domainEndIndex]
-		}
+			domainEndIndex := strings.Index(url, "/")
+			domain := url
+			if domainEndIndex != -1 {
+				domain = url[:domainEndIndex]
+			}
 
-		if strings.Contains(href, domain) {
-			l.Internal++
-		} else {
-			l.External++
-		}
+			if strings.Contains(href, domain) {
+				l.Internal++
+			} else {
+				l.External++
+			}
+
+			wg.Done()
+		}(h)
 	}
+	wg.Wait()
 
 	return
 }
